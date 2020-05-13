@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:math_expressions/math_expressions.dart';
 class HomePage extends StatefulWidget{
 
  
@@ -9,110 +9,174 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage>{
-    double num1=0, num2=0, sum=0;
-    final TextEditingController t1 = new TextEditingController(text: "0");
-      final TextEditingController t2 = new TextEditingController(text: "0");
+    String equation = "0";
+    String result = "0";
+    String expression = "";
+    double equationFontSize = 38.0;
+    double resultFontSize = 48.0;
 
-  void doAdd(){
-    this.setState((){
-      num1 = double.parse(t1.text);
-      num2 = double.parse(t2.text);
-      sum = num1 + num2;
-    });
+  buttonPressed(String buttonText){
+    setState(() {
+      if(buttonText == "CLEAR"){
+        equation = "0";
+        result = "0";
+        equationFontSize = 38.0;
+        resultFontSize = 48.0;
+      }
+
+      else if(buttonText == "<"){
+         equationFontSize = 48.0;
+        resultFontSize = 38.0;
+        equation = equation.substring(0,equation.length - 1);
+        if(equation == ""){
+          equation = "0";
+        }
+      }
+
+      else if(buttonText == "="){
+         equationFontSize = 48.0;
+        resultFontSize = 38.0;
+        
+        expression = equation;
+        expression = expression.replaceAll('X', '*');
+        try{
+          Parser p = new Parser();
+          Expression exp = p.parse(expression);
+          ContextModel cm = ContextModel();
+          result = '${exp.evaluate(EvaluationType.REAL, cm)}';
+        }
+        catch(e){
+          result = "Error";
+        }
+      }
+
+      else{
+         equationFontSize = 38.0;
+        resultFontSize = 48.0;
+        if(equation =="0"){
+          equation = buttonText;
+        }
+        else{
+          equation = equation + buttonText;
+        }
+      }
+    });  
+
+
   }
 
-   void doSub(){
-    this.setState((){
-      num1 = double.parse(t1.text);
-      num2 = double.parse(t2.text);
-      sum = num1 - num2;
-    });
+  Widget button(String buttonText){
+    return Expanded(
+                child: MaterialButton(onPressed: () => buttonPressed(buttonText),
+                child: Text(buttonText,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                ),
+                color: Colors.white30,
+                padding: const EdgeInsets.all(20),
+                splashColor: Colors.teal,
+                ),
+            );
+    
   }
 
-   void doMul(){
-    this.setState((){
-      num1 = double.parse(t1.text);
-      num2 = double.parse(t2.text);
-      sum = num1 * num2;
-    });
-  }
+  
 
-   void doDiv(){
-    this.setState((){
-      num1 = double.parse(t1.text);
-      num2 = double.parse(t2.text);
-      sum = num1 / num2;
-    });
-  }
+  //BUTTON OF CALCULATOR
+
 
   @override
   Widget build(BuildContext context){
-    Color c2 = Colors.blue;
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("GATE Calculator"),
+      appBar: AppBar(
+        title: const Text("Calculator"),
+        backgroundColor: Colors.teal,
       ),
-      body: new Container(
-        padding: const EdgeInsets.all(40.0),
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+
+      body: Container(
+        child: Column(
           children: <Widget>[
-            new Text("OUTPUT: $sum",
-            style: new TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-            ),
-            new TextField(
-              keyboardType: TextInputType.number,
-             decoration: InputDecoration(
-                hintText: "Enter 1st number",
+            Container(
+              alignment: Alignment.bottomRight,
+              padding: EdgeInsets.symmetric(
+                vertical: 24,
+                horizontal: 20
               ),
-              controller: t1,
+              child: Text(equation,
+              style: TextStyle(
+                fontSize: equationFontSize,
+                fontWeight: FontWeight.bold
+              ),
+              ),
             ),
 
-             new TextField(
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: "Enter 2nd number",
+             Container(
+              alignment: Alignment.bottomRight,
+              padding: EdgeInsets.symmetric(
+                horizontal: 20
               ),
-              controller: t2,
+              child: Text(result,
+              style: TextStyle(
+                fontSize: resultFontSize,
+                fontWeight: FontWeight.bold
+              ),
+              ),
             ),
-          new Padding(
-            padding: const EdgeInsets.only(top: 20.0),
-          ),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            
-            children: <Widget>[
-            new MaterialButton(onPressed: doAdd,
-              child: new Text("+"),
-              color: Colors.blue,
+
+
+            new Expanded(child: Container
+            (
+              padding: EdgeInsets.only(top: 155),
+              child: Divider())),
+
+            Row(
+              children: <Widget>[
+                button("7"),
+                button("8"),
+                button("9"),
+                button("/")
+              ],
             ),
-            new MaterialButton(onPressed: doSub,
-              child: new Text("-"),
-              color: Colors.blue,
+
+            Row(
+              children: <Widget>[
+                button("4"),
+                button("5"),
+                button("6"),
+                button("X")
+              ],
             ),
-            ],
-          ),
-          
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-            new MaterialButton(onPressed: doMul,
-              child: new Text("X"),
-              color: Colors.blue,
+
+            Row(
+              children: <Widget>[
+                button("1"),
+                button("2"),
+                button("3"),
+                button("-")
+              ],
             ),
-            
-           new MaterialButton(onPressed: doDiv,
-              child: new Text("/"),
-              color: Colors.blue,
+
+            Row(
+              children: <Widget>[
+                button("."),
+                button("0"),
+                button("00"),
+                button("+")
+              ],
             ),
-            ],
-          )
+
+            Row(
+              children: <Widget>[
+                button("CLEAR"),
+                button("="),
+                button("<")
+              ],
+            ),
           ],
         ),
       ),
-      );
+    );
   }
 }
